@@ -1,11 +1,11 @@
 {
-  "name": "superbalist/laravel-pubsub",
+  "name": "milind/laravel-pubsub",
   "description": "A Pub-Sub abstraction for Laravel",
   "license": "MIT",
   "authors": [
     {
-      "name": "Superbalist.com a division of Takealot Online (Pty) Ltd",
-      "email": "info@superbalist.com"
+      "name": "Milind",
+      "email": "milind@getflits.com"
     }
   ],
   "require": {
