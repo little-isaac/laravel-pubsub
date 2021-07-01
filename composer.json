@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Milind\\LaravelPubSub\\": "src/",
+      "Superbalist\\LaravelPubSub\\": "src/",
       "Tests\\": "tests/"
     }
   },
