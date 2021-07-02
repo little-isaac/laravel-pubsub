@@ -50,6 +50,12 @@ return [
             'driver' => 'kafka',
             'consumer_group_id' => 'php-pubsub',
             'brokers' => env('KAFKA_BROKERS', 'localhost'),
+            'consumerConfig' => [
+                // You can add additional consumer config here for kafka
+            ],
+            'producerConfig' => [
+                // You can add additional producer config here for kafka
+            ]
         ],
 
         'gcloud' => [

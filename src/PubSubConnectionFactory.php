@@ -11,6 +11,7 @@ use Superbalist\PubSub\HTTP\HTTPPubSubAdapter;
 use Superbalist\PubSub\Kafka\KafkaPubSubAdapter;
 use Superbalist\PubSub\PubSubAdapterInterface;
 use Superbalist\PubSub\Redis\RedisPubSubAdapter;
+use Illuminate\Support\Arr;
 
 class PubSubConnectionFactory
 {
@@ -83,21 +84,31 @@ class PubSubConnectionFactory
     protected function makeKafkaAdapter(array $config)
     {
         // create producer
-        $producer = $this->container->makeWith('pubsub.kafka.producer');
+        
+        $producerConf = $this->container->makeWith('pubsub.kafka.conf');
+        $consumerConf = $this->container->makeWith('pubsub.kafka.conf');
+        
+        $producerDefaultconf = [
+            "bootstrap.servers" => $config['brokers']
+        ];
+        $consumerDefaultconf = [
+            "enable.auto.commit" => 'false',
+            "auto.offset.reset" => 'smallest',
+            "bootstrap.servers" => $config['brokers'],
+            "group.id" => Arr::get($config, 'consumer_group_id', 'php-pubsub'),
+        ];
+        
+        foreach(array_merge($consumerDefaultconf,Arr::get($config, 'consumerConfig', [])) as $key => $value){
+            $consumerConf->set($key, $value);
+        }
+        foreach(array_merge($producerDefaultconf,Arr::get($config, 'producerConfig', [])) as $key => $value){
+            $producerConf->set($key, $value);
+        }
+        
+        $producer = $this->container->makeWith('pubsub.kafka.producer',['conf' => $producerConf]);
         $producer->addBrokers($config['brokers']);
-
-        // create consumer
-        $topicConf = $this->container->makeWith('pubsub.kafka.topic_conf');
-        $topicConf->set('auto.offset.reset', 'smallest');
-
-        $conf = $this->container->makeWith('pubsub.kafka.conf');
-        $conf->set('group.id', array_get($config, 'consumer_group_id', 'php-pubsub'));
-        $conf->set('metadata.broker.list', $config['brokers']);
-        $conf->set('enable.auto.commit', 'false');
-        $conf->set('offset.store.method', 'broker');
-        $conf->setDefaultTopicConf($topicConf);
-
-        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $conf]);
+        
+        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
 
         return new KafkaPubSubAdapter($producer, $consumer);
     }
@@ -121,11 +132,11 @@ class PubSubConnectionFactory
 
         $client = $this->container->makeWith('pubsub.gcloud.pub_sub_client', ['config' => $clientConfig]);
 
-        $clientIdentifier = array_get($config, 'client_identifier');
-        $autoCreateTopics = array_get($config, 'auto_create_topics', true);
-        $autoCreateSubscriptions = array_get($config, 'auto_create_subscriptions', true);
-        $backgroundBatching = array_get($config, 'background_batching', false);
-        $backgroundDaemon = array_get($config, 'background_daemon', false);
+        $clientIdentifier = Arr::get($config, 'client_identifier');
+        $autoCreateTopics = Arr::get($config, 'auto_create_topics', true);
+        $autoCreateSubscriptions = Arr::get($config, 'auto_create_subscriptions', true);
+        $backgroundBatching = Arr::get($config, 'background_batching', false);
+        $backgroundDaemon = Arr::get($config, 'background_daemon', false);
 
         if ($backgroundDaemon) {
             putenv('IS_BATCH_DAEMON_RUNNING=true');
