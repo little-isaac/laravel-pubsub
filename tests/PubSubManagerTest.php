@@ -6,10 +6,10 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Foundation\Application;
 use InvalidArgumentException;
 use Mockery;
-use Superbalist\LaravelPubSub\PubSubConnectionFactory;
-use Superbalist\LaravelPubSub\PubSubManager;
-use Superbalist\PubSub\Adapters\DevNullPubSubAdapter;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\LaravelPubSub\PubSubConnectionFactory;
+use milind\LaravelPubSub\PubSubManager;
+use milind\PubSub\Adapters\DevNullPubSubAdapter;
+use milind\PubSub\PubSubAdapterInterface;
 
 class PubSubManagerTest extends TestCase
 {

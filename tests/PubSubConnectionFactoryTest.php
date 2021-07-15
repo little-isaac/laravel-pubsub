@@ -9,14 +9,14 @@ use InvalidArgumentException;
 use Mockery;
 use Predis\Client as RedisClient;
 use Psr\Cache\CacheItemPoolInterface;
-use Superbalist\LaravelPubSub\PubSubConnectionFactory;
-use Superbalist\PubSub\Adapters\DevNullPubSubAdapter;
-use Superbalist\PubSub\Adapters\LocalPubSubAdapter;
-use Superbalist\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
-use Superbalist\PubSub\HTTP\HTTPPubSubAdapter;
-use Superbalist\PubSub\Kafka\KafkaPubSubAdapter;
-use Superbalist\PubSub\PubSubAdapterInterface;
-use Superbalist\PubSub\Redis\RedisPubSubAdapter;
+use milind\LaravelPubSub\PubSubConnectionFactory;
+use milind\PubSub\Adapters\DevNullPubSubAdapter;
+use milind\PubSub\Adapters\LocalPubSubAdapter;
+use milind\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
+use milind\PubSub\HTTP\HTTPPubSubAdapter;
+use milind\PubSub\Kafka\KafkaPubSubAdapter;
+use milind\PubSub\PubSubAdapterInterface;
+use milind\PubSub\Redis\RedisPubSubAdapter;
 
 class PubSubConnectionFactoryTest extends TestCase
 {
@@ -68,7 +68,7 @@ class PubSubConnectionFactoryTest extends TestCase
 
     public function testMakeKafkaAdapter()
     {
-        if (!class_exists('\Superbalist\PubSub\Kafka\KafkaPubSubAdapter')) {
+        if (!class_exists('\milind\PubSub\Kafka\KafkaPubSubAdapter')) {
             $this->markTestSkipped('KafkaPubSubAdapter is not installed');
         }
 

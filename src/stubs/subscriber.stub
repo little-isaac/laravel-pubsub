@@ -3,7 +3,7 @@
 namespace DummyNamespace;
 
 use Illuminate\Console\Command;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\PubSub\PubSubAdapterInterface;
 
 class DummyClass extends Command
 {

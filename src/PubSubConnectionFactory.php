@@ -1,20 +1,22 @@
 <?php
 
-namespace Superbalist\LaravelPubSub;
+namespace milind\LaravelPubSub;
 
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
-use Superbalist\PubSub\Adapters\DevNullPubSubAdapter;
-use Superbalist\PubSub\Adapters\LocalPubSubAdapter;
-use Superbalist\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
-use Superbalist\PubSub\HTTP\HTTPPubSubAdapter;
-use Superbalist\PubSub\Kafka\KafkaPubSubAdapter;
-use Superbalist\PubSub\PubSubAdapterInterface;
-use Superbalist\PubSub\Redis\RedisPubSubAdapter;
+use milind\PubSub\Adapters\DevNullPubSubAdapter;
+use milind\PubSub\Adapters\LocalPubSubAdapter;
+use milind\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
+use milind\PubSub\HTTP\HTTPPubSubAdapter;
+use milind\PubSub\Kafka\KafkaPubSubAdapter;
+use milind\PubSub\Kafka\KafkaPublishAdapter;
+use milind\PubSub\Kafka\KafkaSubscribeAdapter;
+use milind\PubSub\PubSubAdapterInterface;
+use milind\PubSub\Redis\RedisPubSubAdapter;
 use Illuminate\Support\Arr;
 
-class PubSubConnectionFactory
-{
+class PubSubConnectionFactory {
+
     /**
      * @var Container
      */
@@ -23,8 +25,7 @@ class PubSubConnectionFactory
     /**
      * @param Container $container
      */
-    public function __construct(Container $container)
-    {
+    public function __construct(Container $container) {
         $this->container = $container;
     }
 
@@ -36,8 +37,7 @@ class PubSubConnectionFactory
      *
      * @return PubSubAdapterInterface
      */
-    public function make($driver, array $config = [])
-    {
+    public function make($driver, array $config = []) {
         switch ($driver) {
             case '/dev/null':
                 return new DevNullPubSubAdapter();
@@ -47,6 +47,10 @@ class PubSubConnectionFactory
                 return $this->makeRedisAdapter($config);
             case 'kafka':
                 return $this->makeKafkaAdapter($config);
+            case 'kafkaProducer':
+                return $this->makeKafkaProducerAdapter($config);
+            case 'kafkaConsumer':
+                return $this->makeKafkaConsumerAdapter($config);
             case 'gcloud':
                 return $this->makeGoogleCloudAdapter($config);
             case 'http':
@@ -63,8 +67,7 @@ class PubSubConnectionFactory
      *
      * @return RedisPubSubAdapter
      */
-    protected function makeRedisAdapter(array $config)
-    {
+    protected function makeRedisAdapter(array $config) {
         if (!isset($config['read_write_timeout'])) {
             $config['read_write_timeout'] = 0;
         }
@@ -81,13 +84,12 @@ class PubSubConnectionFactory
      *
      * @return KafkaPubSubAdapter
      */
-    protected function makeKafkaAdapter(array $config)
-    {
+    protected function makeKafkaAdapter(array $config) {
         // create producer
-        
+
         $producerConf = $this->container->makeWith('pubsub.kafka.conf');
         $consumerConf = $this->container->makeWith('pubsub.kafka.conf');
-        
+
         $producerDefaultconf = [
             "bootstrap.servers" => $config['brokers']
         ];
@@ -97,22 +99,77 @@ class PubSubConnectionFactory
             "bootstrap.servers" => $config['brokers'],
             "group.id" => Arr::get($config, 'consumer_group_id', 'php-pubsub'),
         ];
-        
-        foreach(array_merge($consumerDefaultconf,Arr::get($config, 'consumerConfig', [])) as $key => $value){
+
+        foreach (array_merge($consumerDefaultconf, Arr::get($config, 'consumerConfig', [])) as $key => $value) {
             $consumerConf->set($key, $value);
         }
-        foreach(array_merge($producerDefaultconf,Arr::get($config, 'producerConfig', [])) as $key => $value){
+        foreach (array_merge($producerDefaultconf, Arr::get($config, 'producerConfig', [])) as $key => $value) {
             $producerConf->set($key, $value);
         }
-        
-        $producer = $this->container->makeWith('pubsub.kafka.producer',['conf' => $producerConf]);
+
+        $producer = $this->container->makeWith('pubsub.kafka.producer', ['conf' => $producerConf]);
         $producer->addBrokers($config['brokers']);
-        
+
         $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
 
         return new KafkaPubSubAdapter($producer, $consumer);
     }
 
+    /**
+     * Factory a KafkaPublishAdapter.
+     *
+     * @param array $config
+     *
+     * @return KafkaPublishAdapter
+     */
+    protected function makeKafkaProducerAdapter(array $config) {
+        // create producer
+
+        $producerConf = $this->container->makeWith('pubsub.kafka.conf');
+
+        $producerDefaultconf = [
+            "bootstrap.servers" => $config['brokers']
+        ];
+
+        foreach (array_merge($producerDefaultconf, Arr::get($config, 'producerConfig', [])) as $key => $value) {
+            $producerConf->set($key, $value);
+        }
+
+        $producer = $this->container->makeWith('pubsub.kafka.producer', ['conf' => $producerConf]);
+        $producer->addBrokers($config['brokers']);
+
+        return new KafkaPublishAdapter($producer);
+    }
+
+    /**
+     * Factory a KafkaSubscribeAdapter.
+     *
+     * @param array $config
+     *
+     * @return KafkaSubscribeAdapter
+     */
+    protected function makeKafkaConsumerAdapter(array $config) {
+        // create producer
+
+        $consumerConf = $this->container->makeWith('pubsub.kafka.conf');
+
+        $consumerDefaultconf = [
+            "enable.auto.commit" => 'false',
+            "auto.offset.reset" => 'smallest',
+            "bootstrap.servers" => $config['brokers'],
+            "group.id" => Arr::get($config, 'consumer_group_id', 'php-pubsub'),
+        ];
+
+        foreach (array_merge($consumerDefaultconf, Arr::get($config, 'consumerConfig', [])) as $key => $value) {
+            $consumerConf->set($key, $value);
+        }
+        
+        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
+
+        return new KafkaSubscribeAdapter($consumer);
+    }
+
+    
     /**
      * Factory a GoogleCloudPubSubAdapter.
      *
@@ -120,8 +177,7 @@ class PubSubConnectionFactory
      *
      * @return GoogleCloudPubSubAdapter
      */
-    protected function makeGoogleCloudAdapter(array $config)
-    {
+    protected function makeGoogleCloudAdapter(array $config) {
         $clientConfig = [
             'projectId' => $config['project_id'],
             'keyFilePath' => $config['key_file'],
@@ -142,11 +198,7 @@ class PubSubConnectionFactory
             putenv('IS_BATCH_DAEMON_RUNNING=true');
         }
         return new GoogleCloudPubSubAdapter(
-            $client,
-            $clientIdentifier,
-            $autoCreateTopics,
-            $autoCreateSubscriptions,
-            $backgroundBatching
+                $client, $clientIdentifier, $autoCreateTopics, $autoCreateSubscriptions, $backgroundBatching
         );
     }
 
@@ -157,13 +209,12 @@ class PubSubConnectionFactory
      *
      * @return HTTPPubSubAdapter
      */
-    protected function makeHTTPAdapter(array $config)
-    {
+    protected function makeHTTPAdapter(array $config) {
         $client = $this->container->make('pubsub.http.client');
         $adapter = $this->make(
-            $config['subscribe_connection_config']['driver'],
-            $config['subscribe_connection_config']
+                $config['subscribe_connection_config']['driver'], $config['subscribe_connection_config']
         );
         return new HTTPPubSubAdapter($client, $config['uri'], $adapter);
     }
+
 }

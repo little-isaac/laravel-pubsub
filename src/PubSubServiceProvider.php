@@ -1,12 +1,12 @@
 <?php
 
-namespace Superbalist\LaravelPubSub;
+namespace milind\LaravelPubSub;
 
 use Google\Cloud\PubSub\PubSubClient as GoogleCloudPubSubClient;
 use GuzzleHttp\Client;
 use Illuminate\Support\ServiceProvider;
 use Predis\Client as RedisClient;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\PubSub\PubSubAdapterInterface;
 
 class PubSubServiceProvider extends ServiceProvider
 {

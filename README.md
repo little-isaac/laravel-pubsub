@@ -2,16 +2,16 @@
 
 A Pub-Sub abstraction for Laravel.
 
-[![Author](http://img.shields.io/badge/author-@superbalist-blue.svg?style=flat-square)](https://twitter.com/superbalist)
-[![Build Status](https://img.shields.io/travis/Superbalist/laravel-pubsub/master.svg?style=flat-square)](https://travis-ci.org/Superbalist/laravel-pubsub)
+[![Author](http://img.shields.io/badge/author-@milind-blue.svg?style=flat-square)](https://twitter.com/milind)
+[![Build Status](https://img.shields.io/travis/milind/laravel-pubsub/master.svg?style=flat-square)](https://travis-ci.org/milind/laravel-pubsub)
 [![StyleCI](https://styleci.io/repos/67405993/shield?branch=master)](https://styleci.io/repos/67405993)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Packagist Version](https://img.shields.io/packagist/v/superbalist/laravel-pubsub.svg?style=flat-square)](https://packagist.org/packages/superbalist/laravel-pubsub)
-[![Total Downloads](https://img.shields.io/packagist/dt/superbalist/laravel-pubsub.svg?style=flat-square)](https://packagist.org/packages/superbalist/laravel-pubsub)
+[![Packagist Version](https://img.shields.io/packagist/v/milind/laravel-pubsub.svg?style=flat-square)](https://packagist.org/packages/milind/laravel-pubsub)
+[![Total Downloads](https://img.shields.io/packagist/dt/milind/laravel-pubsub.svg?style=flat-square)](https://packagist.org/packages/milind/laravel-pubsub)
 
-This package is a wrapper bridging [php-pubsub](https://github.com/Superbalist/php-pubsub) into Laravel.
+This package is a wrapper bridging [php-pubsub](https://github.com/milind/php-pubsub) into Laravel.
 
-For **Laravel 4** support, use the package https://github.com/Superbalist/laravel4-pubsub
+For **Laravel 4** support, use the package https://github.com/milind/laravel4-pubsub
 
 Please note that **Laravel 5.3** is only supported up until version 2.0.2.
 
@@ -28,14 +28,14 @@ The following adapters are supported:
 ## Installation
 
 ```bash
-composer require superbalist/laravel-pubsub
+composer require milind/laravel-pubsub
 ```
 
 Register the service provider in app.php
 ```php
 'providers' => [
     // ...
-    Superbalist\LaravelPubSub\PubSubServiceProvider::class,
+    milind\LaravelPubSub\PubSubServiceProvider::class,
 ]
 ```
 
@@ -43,7 +43,7 @@ Register the facade in app.php
 ```php
 'aliases' => [
     // ...
-    'PubSub' => Superbalist\LaravelPubSub\PubSubFacade::class,
+    'PubSub' => milind\LaravelPubSub\PubSubFacade::class,
 ]
 ```
 
@@ -66,24 +66,24 @@ HTTP_PUBSUB_SUBSCRIBE_CONNECTION=redis
 
 To customize the configuration file, publish the package configuration using Artisan.
 ```bash
-php artisan vendor:publish --provider="Superbalist\LaravelPubSub\PubSubServiceProvider"
+php artisan vendor:publish --provider="milind\LaravelPubSub\PubSubServiceProvider"
 ```
 
 You can then edit the generated config at `app/config/pubsub.php`.
 
 ## Kafka Adapter Installation
 
-Please note that whilst the package is bundled with support for the [php-pubsub-kafka](https://github.com/Superbalist/php-pubsub-kafka)
+Please note that whilst the package is bundled with support for the [php-pubsub-kafka](https://github.com/milind/php-pubsub-kafka)
 adapter, the adapter is not included by default.
 
 This is because the KafkaPubSubAdapter has an external dependency on the `librdkafka c library` and the `php-rdkafka`
 PECL extension.
 
-If you plan on using this adapter, you will need to install these dependencies by following these [installation instructions](https://github.com/Superbalist/php-pubsub-kafka).
+If you plan on using this adapter, you will need to install these dependencies by following these [installation instructions](https://github.com/milind/php-pubsub-kafka).
 
 You can then include the adapter using:
 ```bash
-composer require superbalist/php-pubsub-kafka
+composer require milind/php-pubsub-kafka
 ```
 
 ## Usage
@@ -99,7 +99,7 @@ $pubsub->publish('channel_name', 'message');
 // get the default connection
 $pubsub = app('pubsub.connection');
 // or
-$pubsub = app(\Superbalist\PubSub\PubSubAdapterInterface::class);
+$pubsub = app(\milind\PubSub\PubSubAdapterInterface::class);
 
 // get a specific connection
 $pubsub = app('pubsub')->connection('redis');
@@ -144,7 +144,7 @@ This generator command will create the file `app/Console/Commands/MyExampleSubsc
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\PubSub\PubSubAdapterInterface;
 
 class MyExampleSubscriber extends Command
 {
@@ -207,8 +207,8 @@ Here is an example of how you can do this:
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Superbalist\LaravelPubSub\PubSubConnectionFactory;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\LaravelPubSub\PubSubConnectionFactory;
+use milind\PubSub\PubSubAdapterInterface;
 
 class MyExampleKafkaSubscriber extends Command
 {
@@ -259,7 +259,7 @@ class MyExampleKafkaSubscriber extends Command
 
 ## Adding a Custom Driver
 
-Please see the [php-pubsub](https://github.com/Superbalist/php-pubsub) documentation  **Writing an Adapter**.
+Please see the [php-pubsub](https://github.com/milind/php-pubsub) documentation  **Writing an Adapter**.
 
 To include your custom driver, you can call the `extend()` function.
 

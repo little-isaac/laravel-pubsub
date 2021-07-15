@@ -1,10 +1,10 @@
 <?php
 
-namespace Superbalist\LaravelPubSub;
+namespace milind\LaravelPubSub;
 
 use Illuminate\Contracts\Foundation\Application;
 use InvalidArgumentException;
-use Superbalist\PubSub\PubSubAdapterInterface;
+use milind\PubSub\PubSubAdapterInterface;
 use Illuminate\Support\Arr;
 
 class PubSubManager
