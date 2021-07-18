@@ -9,8 +9,9 @@ use milind\PubSub\Adapters\LocalPubSubAdapter;
 use milind\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
 use milind\PubSub\HTTP\HTTPPubSubAdapter;
 use milind\PubSub\Kafka\KafkaPubSubAdapter;
-use milind\PubSub\Kafka\KafkaPublishAdapter;
-use milind\PubSub\Kafka\KafkaSubscribeAdapter;
+use milind\PubSub\Kafka\KafkaProducerAdapter;
+use milind\PubSub\Kafka\KafkaHighLevelConsumerAdapter;
+use milind\PubSub\Kafka\KafkaLowLevelConsumerAdapter;
 use milind\PubSub\PubSubAdapterInterface;
 use milind\PubSub\Redis\RedisPubSubAdapter;
 use Illuminate\Support\Arr;
@@ -49,8 +50,10 @@ class PubSubConnectionFactory {
                 return $this->makeKafkaAdapter($config);
             case 'kafkaProducer':
                 return $this->makeKafkaProducerAdapter($config);
-            case 'kafkaConsumer':
-                return $this->makeKafkaConsumerAdapter($config);
+            case 'kafkaLowLevelConsumer':
+                return $this->makeKafkaLowLevelConsumerAdapter($config);
+            case 'kafkaHighLevelConsumer':
+                return $this->makeKafkaHighLevelConsumerAdapter($config);
             case 'gcloud':
                 return $this->makeGoogleCloudAdapter($config);
             case 'http':
@@ -138,17 +141,17 @@ class PubSubConnectionFactory {
         $producer = $this->container->makeWith('pubsub.kafka.producer', ['conf' => $producerConf]);
         $producer->addBrokers($config['brokers']);
 
-        return new KafkaPublishAdapter($producer);
+        return new KafkaProducerAdapter($producer);
     }
 
     /**
-     * Factory a KafkaSubscribeAdapter.
+     * Factory a KafkaHighLevelConsumerAdapter.
      *
      * @param array $config
      *
-     * @return KafkaSubscribeAdapter
+     * @return KafkaHighLevelConsumerAdapter
      */
-    protected function makeKafkaConsumerAdapter(array $config) {
+    protected function makeKafkaHighLevelConsumerAdapter(array $config) {
         // create producer
 
         $consumerConf = $this->container->makeWith('pubsub.kafka.conf');
@@ -163,13 +166,40 @@ class PubSubConnectionFactory {
         foreach (array_merge($consumerDefaultconf, Arr::get($config, 'consumerConfig', [])) as $key => $value) {
             $consumerConf->set($key, $value);
         }
-        
+
         $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
 
-        return new KafkaSubscribeAdapter($consumer);
+        return new KafkaHighLevelConsumerAdapter($consumer);
     }
 
-    
+    /**
+     * Factory a KafkaLowLevelConsumerAdapter.
+     *
+     * @param array $config
+     *
+     * @return KafkaLowLevelConsumerAdapter
+     */
+    protected function makeKafkaLowLevelConsumerAdapter(array $config) {
+        // create producer
+
+        $consumerConf = $this->container->makeWith('pubsub.kafka.conf');
+
+        $consumerDefaultconf = [
+            "enable.auto.commit" => 'false',
+            "auto.offset.reset" => 'smallest',
+            "bootstrap.servers" => $config['brokers'],
+            "group.id" => Arr::get($config, 'consumer_group_id', 'php-pubsub'),
+        ];
+
+        foreach (array_merge($consumerDefaultconf, Arr::get($config, 'consumerConfig', [])) as $key => $value) {
+            $consumerConf->set($key, $value);
+        }
+
+        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
+
+        return new KafkaLowLevelConsumerAdapter($consumer);
+    }
+
     /**
      * Factory a GoogleCloudPubSubAdapter.
      *
