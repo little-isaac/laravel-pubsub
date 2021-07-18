@@ -167,7 +167,7 @@ class PubSubConnectionFactory {
             $consumerConf->set($key, $value);
         }
 
-        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
+        $consumer = $this->container->makeWith('pubsub.kafka.high_level_consumer', ['conf' => $consumerConf]);
 
         return new KafkaHighLevelConsumerAdapter($consumer);
     }
@@ -195,7 +195,7 @@ class PubSubConnectionFactory {
             $consumerConf->set($key, $value);
         }
 
-        $consumer = $this->container->makeWith('pubsub.kafka.consumer', ['conf' => $consumerConf]);
+        $consumer = $this->container->makeWith('pubsub.kafka.low_level_consumer', ['conf' => $consumerConf]);
 
         return new KafkaLowLevelConsumerAdapter($consumer);
     }

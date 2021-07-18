@@ -72,8 +72,12 @@ class PubSubServiceProvider extends ServiceProvider
             return new \RdKafka\Conf();
         });
 
-        $this->app->bind('pubsub.kafka.consumer', function ($app, $parameters) {
+        $this->app->bind('pubsub.kafka.high_level_consumer', function ($app, $parameters) {
             return new \RdKafka\KafkaConsumer($parameters['conf']);
+        });
+        
+        $this->app->bind('pubsub.kafka.low_level_consumer', function ($app, $parameters) {
+            return new \RdKafka\Consumer($parameters['conf']);
         });
 
         $this->app->bind('pubsub.http.client', function () {
